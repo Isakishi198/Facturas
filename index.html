@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP - ElectroMantenciones Andinas SpA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --primary: #0f172a;      
+            --primary-light: #1e293b;
+            --accent: #3b82f6;       
+            --accent-hover: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #334155;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --sidebar-width: 260px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body { background-color: var(--bg-body); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-width); background-color: var(--primary); color: white;
+            display: flex; flex-direction: column; transition: 0.3s; z-index: 100;
+        }
+
+        .brand {
+            padding: 20px; display: flex; align-items: center; gap: 15px;
+            background-color: #0b1120; border-bottom: 1px solid #1e293b;
+        }
+        .brand-icon {
+            width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent), #60a5fa);
+            border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold;
+        }
+        .brand-text h1 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; line-height: 1.2;}
+        .brand-text span { font-size: 11px; color: #94a3b8; }
+
+        .nav-menu { padding: 20px 0; flex: 1; }
+        .nav-item {
+            padding: 12px 25px; display: flex; align-items: center; gap: 15px;
+            color: #cbd5e1; cursor: pointer; transition: 0.2s; font-size: 14px; font-weight: 500;
+        }
+        .nav-item:hover, .nav-item.active { background-color: var(--primary-light); color: white; border-left: 4px solid var(--accent); }
+        .nav-item i { width: 20px; text-align: center; font-size: 16px; }
+
+        .sidebar-footer { padding: 20px; border-top: 1px solid #1e293b; font-size: 12px; color: #64748b; text-align: center; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* --- TOPBAR --- */
+        .topbar {
+            background-color: var(--bg-card); height: 70px; display: flex; align-items: center;
+            justify-content: space-between; padding: 0 30px; border-bottom: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .period-controls { display: flex; align-items: center; gap: 15px; }
+        .period-controls label { font-size: 14px; font-weight: 600; color: var(--text-muted); }
+        .period-controls select {
+            padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px;
+            background: var(--bg-body); font-weight: 600; color: var(--primary); outline: none; cursor: pointer;
+        }
+        
+        .topbar-actions { display: flex; gap: 10px; }
+
+        .btn {
+            padding: 9px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600;
+            cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s;
+        }
+        .btn-save { background-color: var(--success); color: white; }
+        .btn-save:hover { background-color: #059669; }
+        .btn-tool { background-color: var(--primary-light); color: white; }
+        .btn-tool:hover { background-color: var(--primary); }
+        .btn-export { background-color: white; border: 1px solid var(--border); color: var(--text-main); }
+        .btn-export:hover { background-color: var(--bg-body); }
+        .btn-add { background-color: var(--accent); color: white; margin-top: 15px; }
+        .btn-add:hover { background-color: var(--accent-hover); }
+
+        /* --- CONTENT AREA --- */
+        .content-area { padding: 30px; overflow-y: auto; flex: 1; }
+        .section { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .section.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .section-header { margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .section-header h2 { font-size: 24px; color: var(--primary); }
+        .section-header p { color: var(--text-muted); font-size: 14px; margin-top: 5px; }
+
+        /* --- DASHBOARD LAYOUT --- */
+        .dash-layout {
+            display: grid;
+            grid-template-columns: 260px 1fr 260px;
+            gap: 25px;
+            align-items: start;
+        }
+
+        .dash-side-col { display: flex; flex-direction: column; gap: 15px; }
+        
+        /* NUEVO DISEÑO: Tarjetas Años Anteriores */
+        .year-card {
+            background: var(--bg-card); padding: 16px; border-radius: 8px; border: 1px solid var(--border);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: transform 0.2s; margin-bottom: 5px;
+        }
+        .year-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-color: #cbd5e1; }
+        .yc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .yc-header h4 { font-size: 15px; color: var(--primary); display: flex; align-items: center; gap: 6px; margin: 0;}
+        .yc-badge { font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .yc-badge.pos { background: #d1fae5; color: #065f46; }
+        .yc-badge.neg { background: #fee2e2; color: #991b1b; }
+        .yc-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+        .yc-label { color: var(--text-muted); }
+        .yc-val { font-weight: 600; }
+        .yc-val.pos { color: var(--success); }
+        .yc-val.neg { color: var(--danger); }
+        .yc-divider { height: 1px; background: var(--border); margin: 10px 0; }
+        .yc-total { font-size: 14px; font-weight: 700; }
+        .yc-total .yc-label { color: var(--primary); }
+
+        /* Lista de Meses (CON SCROLL) */
+        #months-list-container {
+            display: flex; flex-direction: column; gap: 10px;
+            max-height: 440px; overflow-y: auto; padding-right: 8px;
+        }
+        #months-list-container::-webkit-scrollbar { width: 6px; }
+        #months-list-container::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        #months-list-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        #months-list-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .month-item {
+            background: var(--bg-card); padding: 12px 15px; border-radius: 8px; border: 1px solid var(--border);
+            display: flex; flex-direction: column; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            flex-shrink: 0;
+        }
+        .month-item:hover { border-color: var(--accent); transform: translateX(-3px); }
+        .month-item.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .month-item .m-title { font-weight: 600; font-size: 14px; margin-bottom: 5px; display: flex; justify-content: space-between;}
+        .month-item .m-title i { font-size: 12px; opacity: 0.5; }
+        .month-item .m-stat { font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between; }
+        .month-item.active .m-stat { color: #cbd5e1; }
+        .month-item .m-stat b { color: var(--success); }
+        .month-item.active .m-stat b { color: #34d399; }
+
+        /* KPIs Centrales */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .kpi-card { background: var(--bg-card); padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid var(--border); border-top: 4px solid var(--accent); position: relative; }
+        .kpi-card.green { border-top-color: var(--success); }
+        .kpi-card.red { border-top-color: var(--danger); }
+        .kpi-title { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+        .kpi-value { font-size: 24px; font-weight: 700; color: var(--primary); margin: 8px 0; }
+        .kpi-icon { position: absolute; top: 15px; right: 15px; font-size: 20px; color: #e2e8f0; }
+        .kpi-details { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 12px; font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between;}
+
+        /* Graficos Centrales */
+        .charts-container { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        .chart-box { 
+            background: var(--bg-card); padding: 20px; border-radius: 10px; border: 1px solid var(--border); 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column;
+        }
+        .chart-wrapper { position: relative; width: 100%; height: 260px; flex: 1; } 
+
+        /* --- TABLES --- */
+        .table-container { background: var(--bg-card); border-radius: 10px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; }
+        .table-toolbar { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
+        .search-wrapper { position: relative; width: 300px; }
+        .search-wrapper i { position: absolute; left: 12px; top: 10px; color: var(--text-muted); font-size: 14px;}
+        .search-wrapper input { width: 100%; padding: 8px 15px 8px 35px; border: 1px solid var(--border); border-radius: 6px; outline: none; font-size: 14px; }
+        .search-wrapper input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+        th { background: #f1f5f9; color: var(--text-muted); font-size: 12px; font-weight: 600; text-transform: uppercase; padding: 12px 15px; text-align: left; letter-spacing: 0.5px; border-bottom: 2px solid var(--border); }
+        td { padding: 10px 15px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--primary-light); vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #f8fafc; }
+
+        td[contenteditable="true"] { transition: 0.2s; }
+        td[contenteditable="true"]:focus { background: #fffbeb; outline: 2px solid var(--warning); border-radius: 4px; }
+        
+        input[type="date"], select { border: 1px solid #cbd5e1; border-radius: 4px; padding: 5px; font-family: inherit; font-size: 13px; color: var(--primary); width: 100%; outline: none; }
+        
+        .monto-cell { font-weight: 600; text-align: right; }
+
+        .btn-action { color: var(--text-muted); background: none; border: none; cursor: pointer; font-size: 16px; padding: 5px; border-radius: 4px; transition: 0.2s; }
+        .btn-action:hover { color: var(--danger); background: #fee2e2; }
+
+        @media (max-width: 1300px) { .dash-layout { grid-template-columns: 220px 1fr 220px; } }
+        @media (max-width: 1024px) { 
+            .dash-layout { grid-template-columns: 1fr; }
+            .charts-container { grid-template-columns: 1fr; }
+            .chart-wrapper { height: 300px; }
+            #months-list-container { max-height: 250px; }
+        }
+
+        /* --- NOTIFICATION --- */
+        .toast {
+            position: fixed; bottom: 30px; right: 30px; background: var(--primary); color: white;
+            padding: 15px 25px; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            display: flex; align-items: center; gap: 12px; z-index: 1000;
+            transform: translateX(150%); transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .toast.show { transform: translateX(0); }
+
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="brand">
+        <div class="brand-icon">E</div>
+        <div class="brand-text">
+            <h1>ElectroMantenciones</h1>
+            <span>Andinas SpA - ERP</span>
+        </div>
+    </div>
+    <div class="nav-menu">
+        <div class="nav-item active" onclick="navigate('dashboard', this)">
+            <i class="fa-solid fa-chart-pie"></i> Panel de Control
+        </div>
+        <div class="nav-item" onclick="navigate('ventas', this)">
+            <i class="fa-solid fa-file-invoice-dollar"></i> Registro Ventas
+        </div>
+        <div class="nav-item" onclick="navigate('compras', this)">
+            <i class="fa-solid fa-shopping-cart"></i> Registro Compras
+        </div>
+    </div>
+    <div class="sidebar-footer">
+        Versión 2.3 Enterprise<br>Layout Estadísticas Optimizado
+    </div>
+</aside>
+
+<main class="main-content">
+    
+    <header class="topbar">
+        <div class="period-controls">
+            <label><i class="fa-regular fa-calendar-alt"></i> Mes de Edición:</label>
+            <select id="select-mes" onchange="cargarDatosMes()">
+                <option value="0">Enero</option><option value="1">Febrero</option>
+                <option value="2">Marzo</option><option value="3">Abril</option>
+                <option value="4">Mayo</option><option value="5">Junio</option>
+                <option value="6">Julio</option><option value="7">Agosto</option>
+                <option value="8">Septiembre</option><option value="9">Octubre</option>
+                <option value="10">Noviembre</option><option value="11">Diciembre</option>
+            </select>
+            <select id="select-anio" onchange="cargarDatosMes()">
+                <option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option>
+            </select>
+        </div>
+     
+    </header>
+
+    <div class="content-area">
+        
+        <section id="sec-dashboard" class="section active">
+            <div class="section-header">
+                <div>
+                    <h2>Estadísticas Anuales <span id="dash-year-title" style="color:var(--accent);">2026</span></h2>
+                    <p id="dash-subtitle">Visión general anual y comparativa de caja.</p>
+                </div>
+                <button class="btn btn-export" onclick="window.print()"><i class="fa-solid fa-print"></i> Imprimir Reporte</button>
+            </div>
+
+            <div class="dash-layout">
+                <div class="dash-side-col" id="col-past-years">
+                    <h3 style="font-size: 13px; color: var(--text-muted); text-transform: uppercase;">Resumen Otros Años</h3>
+                    </div>
+
+                <div class="dash-center-col">
+                    <div class="kpi-grid">
+                        <div class="kpi-card green">
+                            <i class="fa-solid fa-arrow-trend-up kpi-icon"></i>
+                            <div class="kpi-title">Ventas (Total Anual)</div>
+                            <div class="kpi-value" id="kpi-ventas-total">$0</div>
+                            <div class="kpi-details">
+                                <span>Neto: <b id="kpi-ventas-neto">$0</b></span>
+                                <span>IVA (19%): <b id="kpi-ventas-iva">$0</b></span>
+                            </div>
+                        </div>
+                        <div class="kpi-card red">
+                            <i class="fa-solid fa-arrow-trend-down kpi-icon"></i>
+                            <div class="kpi-title">Compras (Total Anual)</div>
+                            <div class="kpi-value" id="kpi-compras-total">$0</div>
+                            <div class="kpi-details">
+                                <span>Neto: <b id="kpi-compras-neto">$0</b></span>
+                                <span>IVA (19%): <b id="kpi-compras-iva">$0</b></span>
+                            </div>
+                        </div>
+                        <div class="kpi-card" style="border-top-color: var(--primary);">
+                            <i class="fa-solid fa-scale-balanced kpi-icon"></i>
+                            <div class="kpi-title">Utilidad Bruta Anual</div>
+                            <div class="kpi-value" id="kpi-utilidad">$0</div>
+                            <div class="kpi-details" style="justify-content: center;">
+                                <span id="kpi-margen" style="font-weight: bold; color: var(--primary);">Margen: 0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="charts-container">
+                        <div class="chart-box">
+                            <h3 style="font-size: 14px; color: var(--text-muted); margin-bottom: 15px;">Comparativa Ingresos vs Egresos del Año</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="mainChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dash-side-col" id="col-months">
+                    <h3 style="font-size: 13px; color: var(--text-muted); text-transform: uppercase;">Desglose Mensual</h3>
+                    <div id="months-list-container">
+                        </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="sec-ventas" class="section">
+            <div class="section-header">
+                <div>
+                    <h2>Registro de Ventas</h2>
+                    <p>Gestión de facturas emitidas a clientes en el mes seleccionado.</p>
+                </div>
+            </div>
+            <div class="table-container">
+                <div class="table-toolbar">
+                    <div class="search-wrapper">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" id="searchVentas" placeholder="Buscar cliente, factura..." onkeyup="filtrar('ventasTable', 'searchVentas')">
+                    </div>
+                    <button class="btn btn-export" onclick="exportar('ventasTable', 'Ventas')"><i class="fa-solid fa-file-csv"></i> Exportar CSV</button>
+                </div>
+                <div class="table-responsive">
+                    <table id="ventasTable">
+                        <thead>
+                            <tr>
+                                <th width="12%">Factura</th>
+                                <th width="22%">Cliente</th>
+                                <th width="14%">Emisión</th>
+                                <th width="14%">Vencimiento</th>
+                                <th width="18%" style="text-align: right;">Total Bruto ($)</th>
+                                <th width="12%">Tipo</th>
+                                <th width="8%" style="text-align:center;">Borrar</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <button class="btn btn-add" onclick="agregarFila('ventasTable')"><i class="fa-solid fa-plus"></i> Añadir Nueva Venta</button>
+        </section>
+
+        <section id="sec-compras" class="section">
+            <div class="section-header">
+                <div>
+                    <h2>Registro de Compras</h2>
+                    <p>Gestión de facturas recibidas y gastos en el mes seleccionado.</p>
+                </div>
+            </div>
+            <div class="table-container">
+                <div class="table-toolbar">
+                    <div class="search-wrapper">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" id="searchCompras" placeholder="Buscar proveedor, factura..." onkeyup="filtrar('comprasTable', 'searchCompras')">
+                    </div>
+                    <button class="btn btn-export" onclick="exportar('comprasTable', 'Compras')"><i class="fa-solid fa-file-csv"></i> Exportar CSV</button>
+                </div>
+                <div class="table-responsive">
+                    <table id="comprasTable">
+                        <thead>
+                            <tr>
+                                <th width="12%">Factura</th>
+                                <th width="22%">Proveedor</th>
+                                <th width="14%">Emisión</th>
+                                <th width="14%">Recibo</th>
+                                <th width="18%" style="text-align: right;">Total Bruto ($)</th>
+                                <th width="12%">Centro Costo</th>
+                                <th width="8%" style="text-align:center;">Borrar</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <button class="btn btn-add" onclick="agregarFila('comprasTable')"><i class="fa-solid fa-plus"></i> Añadir Nueva Compra</button>
+        </section>
+
+    </div>
+</main>
+
+<div id="toast" class="toast">
+    <i class="fa-solid fa-circle-check" style="font-size: 20px;"></i>
+    <span id="toast-msg">Acción realizada</span>
+</div>
+
+<script>
+    const fmt = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
+    const nombresMeses = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+    
+    let barChartInstance = null;
+
+    window.onload = () => {
+        const hoy = new Date();
+        document.getElementById('select-mes').value = hoy.getMonth();
+        document.getElementById('select-anio').value = hoy.getFullYear();
+        cargarDatosMes();
+    };
+
+    function navigate(sectionId, element) {
+        document.querySelectorAll('.section, .nav-item').forEach(el => el.classList.remove('active'));
+        document.getElementById(`sec-${sectionId}`).classList.add('active');
+        element.classList.add('active');
+        if(sectionId === 'dashboard') actualizarDashboardGlobal();
+    }
+
+    function agregarFila(tableId, data = null) {
+        const tbody = document.querySelector(`#${tableId} tbody`);
+        const row = tbody.insertRow();
+        const isCompra = tableId === 'comprasTable';
+
+        row.innerHTML = `
+            <td contenteditable="true">${data ? data.f : ''}</td>
+            <td contenteditable="true">${data ? data.entidad : ''}</td>
+            <td><input type="date" value="${data ? data.d1 : ''}"></td>
+            <td><input type="date" value="${data ? data.d2 : ''}"></td>
+            <td contenteditable="true" class="monto-cell">${data ? fmt.format(data.m) : ''}</td>
+            <td>
+                <select>
+                    <option value="">Seleccione...</option>
+                    ${isCompra ? 
+                        `<option value="Material" ${data?.t === 'Material' ? 'selected' : ''}>Material</option>
+                         <option value="Servicio" ${data?.t === 'Servicio' ? 'selected' : ''}>Servicio</option>
+                         <option value="Activo Fijo" ${data?.t === 'Activo Fijo' ? 'selected' : ''}>Activo Fijo</option>` :
+                        `<option value="Producto" ${data?.t === 'Producto' ? 'selected' : ''}>Producto</option>
+                         <option value="Servicio" ${data?.t === 'Servicio' ? 'selected' : ''}>Servicio</option>`
+                    }
+                </select>
+            </td>
+            <td style="text-align:center;"><button class="btn-action" onclick="eliminarFila(this)"><i class="fa-solid fa-trash-can"></i></button></td>
+        `;
+        actualizarDashboardGlobal();
+    }
+
+    function eliminarFila(btn) {
+        if(confirm('¿Eliminar este registro?')) {
+            btn.closest('tr').remove();
+            actualizarDashboardGlobal();
+        }
+    }
+
+    function extraerDatosTabla(tableId) {
+        return Array.from(document.querySelectorAll(`#${tableId} tbody tr`)).map(tr => ({
+            f: tr.cells[0].innerText, entidad: tr.cells[1].innerText,
+            d1: tr.cells[2].querySelector('input').value, d2: tr.cells[3].querySelector('input').value,
+            m: parseInt(tr.cells[4].innerText.replace(/\D/g, '')) || 0,
+            t: tr.cells[5].querySelector('select').value
+        }));
+    }
+
+    // Guardado silencioso al navegar entre meses
+    function guardarDatosSilencioso() {
+        const mes = document.getElementById('select-mes').value;
+        const anio = document.getElementById('select-anio').value;
+        localStorage.setItem(`ERP_V2_${anio}_${mes}`, JSON.stringify({
+            compras: extraerDatosTabla('comprasTable'),
+            ventas: extraerDatosTabla('ventasTable')
+        }));
+    }
+
+    // Guardado manual con notificación
+    function guardarDatosBoton() {
+        guardarDatosSilencioso();
+        mostrarToast("Registros guardados exitosamente");
+        actualizarDashboardGlobal();
+    }
+
+    function cargarDatosMes() {
+        const mes = document.getElementById('select-mes').value;
+        const anio = document.getElementById('select-anio').value;
+        const guardado = localStorage.getItem(`ERP_V2_${anio}_${mes}`);
+
+        document.querySelector('#comprasTable tbody').innerHTML = '';
+        document.querySelector('#ventasTable tbody').innerHTML = '';
+
+        if (guardado) {
+            const { compras, ventas } = JSON.parse(guardado);
+            compras.forEach(d => agregarFila('comprasTable', d));
+            ventas.forEach(d => agregarFila('ventasTable', d));
+        } else {
+            for(let i=0; i<3; i++) agregarFila('ventasTable');
+            for(let i=0; i<3; i++) agregarFila('comprasTable');
+        }
+        actualizarDashboardGlobal();
+    }
+
+    // ==========================================
+    // LÓGICA DEL DASHBOARD
+    // ==========================================
+
+    function obtenerTotalesMes(anio, mesIdx) {
+        const esMesActual = (anio == document.getElementById('select-anio').value && mesIdx == document.getElementById('select-mes').value);
+        let v = 0, c = 0;
+
+        if (esMesActual) {
+            document.querySelectorAll('#comprasTable tbody tr').forEach(tr => {
+                c += parseInt(tr.cells[4].innerText.replace(/\D/g, '')) || 0;
+            });
+            document.querySelectorAll('#ventasTable tbody tr').forEach(tr => {
+                v += parseInt(tr.cells[4].innerText.replace(/\D/g, '')) || 0;
+            });
+        } else {
+            const data = localStorage.getItem(`ERP_V2_${anio}_${mesIdx}`);
+            if (data) {
+                const { compras, ventas } = JSON.parse(data);
+                compras.forEach(x => c += x.m);
+                ventas.forEach(x => v += x.m);
+            }
+        }
+        return { ventas: v, compras: c, utilidad: v - c };
+    }
+
+    function actualizarDashboardGlobal() {
+        const anioSeleccionado = document.getElementById('select-anio').value;
+        document.getElementById('dash-year-title').innerText = anioSeleccionado;
+        
+        let totalAnualV = 0, totalAnualC = 0;
+        const mesesContainer = document.getElementById('months-list-container');
+        mesesContainer.innerHTML = ''; 
+
+        for (let m = 0; m < 12; m++) {
+            const tMes = obtenerTotalesMes(anioSeleccionado, m);
+            totalAnualV += tMes.ventas;
+            totalAnualC += tMes.compras;
+
+            const esActivo = (m == document.getElementById('select-mes').value);
+            const classAct = esActivo ? 'active' : '';
+            const utilText = tMes.utilidad >= 0 ? `+${fmt.format(tMes.utilidad)}` : fmt.format(tMes.utilidad);
+            
+            mesesContainer.innerHTML += `
+                <div class="month-item ${classAct}" onclick="irAMes(${m})">
+                    <div class="m-title">
+                        <span>${nombresMeses[m]}</span>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
+                    <div class="m-stat">
+                        <span>Ven: ${fmt.format(tMes.ventas)}</span>
+                        <b>Util: ${utilText}</b>
+                    </div>
+                </div>
+            `;
+        }
+
+        const netoV = Math.round(totalAnualV / 1.19);
+        const netoC = Math.round(totalAnualC / 1.19);
+        const utilAnual = totalAnualV - totalAnualC;
+        const margen = totalAnualV > 0 ? ((utilAnual / totalAnualV) * 100).toFixed(1) : 0;
+
+        document.getElementById('kpi-ventas-total').innerText = fmt.format(totalAnualV);
+        document.getElementById('kpi-ventas-neto').innerText = fmt.format(netoV);
+        document.getElementById('kpi-ventas-iva').innerText = fmt.format(totalAnualV - netoV);
+
+        document.getElementById('kpi-compras-total').innerText = fmt.format(totalAnualC);
+        document.getElementById('kpi-compras-neto').innerText = fmt.format(netoC);
+        document.getElementById('kpi-compras-iva').innerText = fmt.format(totalAnualC - netoC);
+
+        const uEl = document.getElementById('kpi-utilidad');
+        uEl.innerText = fmt.format(utilAnual);
+        uEl.style.color = utilAnual >= 0 ? 'var(--success)' : 'var(--danger)';
+        document.getElementById('kpi-margen').innerText = `Margen Bruto: ${margen}%`;
+
+        dibujarGraficos(totalAnualV, totalAnualC);
+
+        // Actualizar Columna Izquierda (Años Anteriores con el nuevo formato)
+        const pastYearsContainer = document.getElementById('col-past-years');
+        pastYearsContainer.innerHTML = '<h3 style="font-size: 13px; color: var(--text-muted); text-transform: uppercase;">Resumen Otros Años</h3>';
+        
+        Array.from(document.getElementById('select-anio').options).forEach(opt => {
+            const a = opt.value;
+            if(a !== anioSeleccionado) {
+                let vA=0, cA=0;
+                for (let m = 0; m < 12; m++) {
+                    const dt = obtenerTotalesMes(a, m);
+                    vA += dt.ventas; cA += dt.compras;
+                }
+                const utA = vA - cA;
+                
+                const gananciaClass = utA >= 0 ? 'pos' : 'neg';
+                const gananciaTexto = utA >= 0 ? 'Ganancia' : 'Pérdida';
+
+                pastYearsContainer.innerHTML += `
+                    <div class="year-card">
+                        <div class="yc-header">
+                            <h4><i class="fa-regular fa-calendar-check"></i> ${a}</h4>
+                            <span class="yc-badge ${gananciaClass}">${gananciaTexto}</span>
+                        </div>
+                        <div class="yc-body">
+                            <div class="yc-row">
+                                <span class="yc-label">Ingresos</span>
+                                <span class="yc-val pos">${fmt.format(vA)}</span>
+                            </div>
+                            <div class="yc-row">
+                                <span class="yc-label">Egresos</span>
+                                <span class="yc-val neg">${fmt.format(cA)}</span>
+                            </div>
+                            <div class="yc-divider"></div>
+                            <div class="yc-row yc-total">
+                                <span class="yc-label">Utilidad</span>
+                                <span class="yc-val ${gananciaClass}">${fmt.format(utA)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+    }
+
+    function irAMes(mesIdx) {
+        guardarDatosSilencioso(); 
+        document.getElementById('select-mes').value = mesIdx;
+        cargarDatosMes();
+    }
+
+    function dibujarGraficos(v, c) {
+        const ctxBar = document.getElementById('mainChart').getContext('2d');
+        if(barChartInstance) barChartInstance.destroy();
+        barChartInstance = new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: ['Ventas (Ingresos)', 'Compras (Egresos)'],
+                datasets: [{ data: [v, c], backgroundColor: ['#10b981', '#ef4444'], borderRadius: 6 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+    }
+
+    document.addEventListener('blur', (e) => {
+        if (e.target.classList.contains('monto-cell')) {
+            let v = e.target.innerText.replace(/\D/g, '');
+            e.target.innerText = v ? fmt.format(v) : '';
+            actualizarDashboardGlobal();
+        }
+    }, true);
+
+    function mostrarToast(msg) {
+        const t = document.getElementById('toast');
+        document.getElementById('toast-msg').innerText = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // NUEVA FÓRMULA GENERADORA (Para llegar a ~40,000,000 en el año)
+    function generarDatosMasivos() {
+        if(!confirm("Esto llenará de datos reales de prueba 2024, 2025 y hasta Marzo de 2026. ¿Proceder?")) return;
+        const years = [2024, 2025, 2026];
+        const provs = ["Sodimac HBE", "TecnoRed SA", "Ferretería O'Higgins"];
+        const clis = ["Minera Los Pelambres", "Codelco", "Constructora Echeverría"];
+
+        years.forEach(anio => {
+            let maxMes = (anio === 2026) ? 2 : 11; 
+            for (let mes = 0; mes <= maxMes; mes++) {
+                let compras = [], ventas = [];
+                for(let i=0; i<4; i++) {
+                    compras.push({
+                        f: `FC-${Math.floor(Math.random()*80000)+10000}`, entidad: provs[Math.floor(Math.random()*provs.length)],
+                        d1: `${anio}-${String(mes+1).padStart(2,'0')}-05`, d2: `${anio}-${String(mes+1).padStart(2,'0')}-20`,
+                        // Compras entre 100k y 700k por factura
+                        m: Math.floor(Math.random()*600000)+100000, t: "Material"
+                    });
+                    ventas.push({
+                        f: `FV-${Math.floor(Math.random()*80000)+10000}`, entidad: clis[Math.floor(Math.random()*clis.length)],
+                        d1: `${anio}-${String(mes+1).padStart(2,'0')}-10`, d2: `${anio}-${String(mes+1).padStart(2,'0')}-25`,
+                        // Ventas entre 200k y 1.4M por factura (Para que *4 facturas *12 meses ronde los 40 Millones)
+                        m: Math.floor(Math.random()*1200000)+200000, t: "Servicio"
+                    });
+                }
+                localStorage.setItem(`ERP_V2_${anio}_${mes}`, JSON.stringify({ compras, ventas }));
+            }
+        });
+        mostrarToast("Base de datos de prueba (Escala ~40M) generada.");
+        cargarDatosMes(); 
+    }
+
+    function exportar(tId, name) {
+        let csv = "Factura;Entidad;Fecha_Emision;Fecha_Cierre;Monto_Bruto;Tipo\n";
+        document.querySelectorAll(`#${tId} tbody tr`).forEach(tr => {
+            const row = [
+                tr.cells[0].innerText, tr.cells[1].innerText,
+                tr.cells[2].querySelector('input').value, tr.cells[3].querySelector('input').value,
+                tr.cells[4].innerText.replace(/\D/g, ''), tr.cells[5].querySelector('select').value
+            ];
+            csv += row.join(";") + "\n";
+        });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        const mes = document.getElementById('select-mes').options[document.getElementById('select-mes').selectedIndex].text;
+        link.download = `Reporte_${name}_${mes}.csv`;
+        link.click();
+    }
+</script>
+</body>
+</html>
