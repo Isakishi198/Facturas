@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP - ElectroMantenciones Andinas SpA</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <meta name="theme-color" content="#1a365d">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-blue: #1a365d;
+            --brand-accent: #f59e0b;
+            --bg-light: #f1f5f9;
+            --text-dark: #334155;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .dashboard {
+            max-width: 1300px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border-top: 6px solid var(--brand-blue);
+        }
+
+        /* Encabezado */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-placeholder {
+            width: 150px; 
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-placeholder img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .company-name h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--brand-blue);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .date-now {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        /* Herramientas */
+        .toolbar {
+            padding: 15px 30px;
+            background: #f8fafc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            padding: 8px 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            flex: 1;
+            min-width: 250px;
+            outline: none;
+        }
+
+        .btn {
+            padding: 8px 18px;
+            border-radius: 5px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-export { background: var(--success); color: white; }
+        .btn-add { background: var(--brand-blue); color: white; font-size: 0.85rem; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* Contenedor de Tabla con Scroll */
+        .table-responsive {
+            padding: 0 30px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 950px; /* Ancho mínimo para forzar el scroll horizontal */
+        }
+
+        th {
+            text-align: left;
+            padding: 12px;
+            font-size: 0.75rem;
+            color: #64748b;
+            text-transform: uppercase;
+            border-bottom: 2px solid #e2e8f0;
+            background: white;
+            white-space: nowrap;
+        }
+
+        td { padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+        
+        [contenteditable="true"]:focus {
+            background: #fffbeb;
+            outline: 2px solid var(--brand-accent);
+            border-radius: 3px;
+        }
+
+        .btn-delete {
+            color: #ef4444;
+            background: #fee2e2;
+            border: none;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn-delete:hover { background: #fecaca; }
+
+        .add-row-container { padding: 15px 30px; }
+
+        /* Resumen */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px 30px;
+            background: #f8fafc;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--brand-blue);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .stat-card span { display: block; font-size: 0.8rem; color: #64748b; }
+        .stat-card strong { font-size: 1.2rem; color: var(--brand-blue); }
+
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            header { justify-content: center; text-align: center; }
+            .brand-section { flex-direction: column; }
+            .toolbar { padding: 15px; }
+            .table-responsive { padding: 0 10px; }
+            .summary-grid { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <header>
+        <div class="brand-section">
+            <div class="logo-placeholder">
+                <img src="logo.png" alt="Logo"> 
+            </div>
+            <div class="company-name">
+                <h1>ElectroMantenciones Andinas SpA</h1>
+                <small>Sistema de Gestión de Compras y Servicios</small>
+            </div>
+        </div>
+        <div class="date-now" id="current-date"></div>
+    </header>
+
+    <div class="toolbar">
+        <input type="text" class="search-box" id="searchInput" placeholder="Buscar proveedor o factura..." onkeyup="filtrarTabla()">
+        <button class="btn btn-export" onclick="exportarCSV()">
+            <span>⬇</span> Exportar
+        </button>
+    </div>
+
+    <div class="table-responsive">
+        <table id="mainTable">
+            <thead>
+                <tr>
+                    <th>Nº Factura</th>
+                    <th>Proveedor</th>
+                    <th>Emisión</th>
+                    <th>Recibo</th>
+                    <th>Monto Total</th>
+                    <th>Nº OC</th>
+                    <th>Tipo</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td contenteditable="true"></td>
+                    <td contenteditable="true"></td>
+                    <td contenteditable="true"></td>
+                    <td contenteditable="true"></td>
+                    <td contenteditable="true" class="monto-cell"></td>
+                    <td contenteditable="true"></td>
+                    <td>
+                        <select class="tipo-select" onchange="actualizarTotales()">
+                            <option value="">Seleccione...</option>
+                            <option value="Material">Material</option>
+                            <option value="Servicio">Servicio</option>
+                        </select>
+                    </td>
+                    <td><button class="btn-delete" onclick="eliminarFila(this)">×</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="add-row-container">
+        <button class="btn btn-add" onclick="agregarFila()">+ Añadir Fila</button>
+    </div>
+
+    <div class="summary-grid">
+        <div class="stat-card" style="border-color: var(--brand-accent);">
+            <span>Total Materiales</span>
+            <strong id="total-materiales">$0</strong>
+        </div>
+        <div class="stat-card" style="border-color: #3b82f6;">
+            <span>Total Servicios</span>
+            <strong id="total-servicios">$0</strong>
+        </div>
+        <div class="stat-card" style="border-color: var(--success);">
+            <span>Gran Total Bruto</span>
+            <strong id="gran-total">$0</strong>
+        </div>
+    </div>
+</div>
+
+<script>
+    const fmt = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
+
+    function agregarFila() {
+        const tbody = document.querySelector('#mainTable tbody');
+        const row = tbody.insertRow();
+        row.innerHTML = `
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true" class="monto-cell"></td>
+            <td contenteditable="true"></td>
+            <td>
+                <select class="tipo-select" onchange="actualizarTotales()">
+                    <option value="">Seleccione...</option>
+                    <option value="Material">Material</option>
+                    <option value="Servicio">Servicio</option>
+                </select>
+            </td>
+            <td><button class="btn-delete" onclick="eliminarFila(this)">×</button></td>
+        `;
+        return row;
+    }
+
+    function eliminarFila(btn) {
+        if(confirm('¿Eliminar este registro?')) {
+            btn.closest('tr').remove();
+            actualizarTotales();
+        }
+    }
+
+    function actualizarTotales() {
+        let tMat = 0, tSer = 0;
+        document.querySelectorAll('#mainTable tbody tr').forEach(tr => {
+            const montoCell = tr.querySelector('.monto-cell');
+            const select = tr.querySelector('.tipo-select');
+            if (montoCell && select) {
+                const monto = parseInt(montoCell.innerText.replace(/\D/g, '')) || 0;
+                if (select.value === 'Material') tMat += monto;
+                if (select.value === 'Servicio') tSer += monto;
+            }
+        });
+        document.getElementById('total-materiales').innerText = fmt.format(tMat);
+        document.getElementById('total-servicios').innerText = fmt.format(tSer);
+        document.getElementById('gran-total').innerText = fmt.format(tMat + tSer);
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const active = document.activeElement;
+            if (active.getAttribute('contenteditable') === 'true') {
+                e.preventDefault();
+                const row = active.closest('tr');
+                const cells = Array.from(row.querySelectorAll('[contenteditable="true"], select'));
+                const idx = cells.indexOf(active);
+                if (idx < cells.length - 1) {
+                    cells[idx + 1].focus();
+                } else {
+                    const nextRow = row.nextElementSibling || agregarFila();
+                    nextRow.querySelector('[contenteditable="true"]').focus();
+                }
+            }
+        }
+    });
+
+    document.addEventListener('blur', (e) => {
+        if (e.target.classList.contains('monto-cell')) {
+            let val = e.target.innerText.replace(/\D/g, '');
+            if (val) e.target.innerText = fmt.format(val);
+            actualizarTotales();
+        }
+    }, true);
+
+    function filtrarTabla() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        document.querySelectorAll('#mainTable tbody tr').forEach(tr => {
+            tr.style.display = tr.innerText.toLowerCase().includes(query) ? '' : 'none';
+        });
+    }
+
+    function exportarCSV() {
+        let csv = "Factura;Proveedor;Emision;Recibo;Monto;OC;Tipo\n";
+        document.querySelectorAll('#mainTable tbody tr').forEach(tr => {
+            const rowData = Array.from(tr.cells).slice(0, 7).map(c => {
+                const sel = c.querySelector('select');
+                return sel ? sel.value : c.innerText.replace(/;/g, '').replace(/\./g, '');
+            });
+            csv += rowData.join(";") + "\n";
+        });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "Registro_ElectroMantenciones.csv";
+        link.click();
+    }
+
+    document.getElementById('current-date').innerText = new Date().toLocaleDateString('es-CL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    // --- REGISTRO DEL SERVICE WORKER (Agregado aquí) ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(registration => {
+                    console.log('ServiceWorker registrado con éxito con el alcance: ', registration.scope);
+                })
+                .catch(error => {
+                    console.log('Fallo al registrar el ServiceWorker: ', error);
+                });
+        });
+    }
+</script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 {
   "name": "ERP - ElectroMantenciones Andinas SpA",
-  "short_name": "Electro ERP",
+  "short_name": "ElectroERP",
   "description": "Sistema de Gestión de Compras y Servicios",
   "start_url": "./index.html",
   "display": "standalone",
