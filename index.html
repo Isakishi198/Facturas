@@ -27,7 +27,50 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
-        body { background-color: var(--bg-body); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+        body { background-color: var(--bg-body); color: var(--text-main); height: 100vh; overflow: hidden; }
+
+        /* --- PANTALLA DE LOGIN --- */
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--primary);
+            background-image: radial-gradient(circle at top right, #1e293b, #0f172a);
+            display: flex; justify-content: center; align-items: center; z-index: 9999;
+        }
+        
+        .login-card {
+            background: var(--bg-card); padding: 40px; border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3); text-align: center;
+            width: 100%; max-width: 400px; animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .login-logo {
+            width: 90px; height: 90px; margin: 0 auto 20px;
+            background: #f8fafc; border-radius: 10px; padding: 10px; border: 1px solid var(--border);
+        }
+        .login-logo img { width: 100%; height: 100%; object-fit: contain; }
+        .login-card h2 { color: var(--primary); font-size: 22px; margin-bottom: 5px; }
+        .login-card p { color: var(--text-muted); font-size: 14px; margin-bottom: 30px; }
+        
+        .input-group { position: relative; margin-bottom: 15px; }
+        .input-group i { position: absolute; left: 15px; top: 14px; color: var(--text-muted); }
+        .input-group input {
+            width: 100%; padding: 12px 15px 12px 40px; border: 1px solid var(--border);
+            border-radius: 6px; font-size: 15px; outline: none; transition: 0.2s;
+        }
+        .input-group input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        
+        #login-error { color: var(--danger); font-size: 13px; margin-bottom: 15px; min-height: 18px; display: none; font-weight: 500;}
+        
+        .btn-login {
+            width: 100%; padding: 12px; background: var(--accent); color: white; border: none;
+            border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 15px;
+        }
+        .btn-login:hover { background: var(--accent-hover); transform: translateY(-1px); }
+
+        /* --- APP CONTENEDOR PRINCIPAL --- */
+        #app-container { display: none; width: 100%; height: 100%; }
 
         /* --- SIDEBAR --- */
         .sidebar {
@@ -36,28 +79,16 @@
         }
 
         .brand {
-            padding: 20px; display: flex; align-items: center; gap: 15px;
+            padding: 20px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px;
             background-color: #0b1120; border-bottom: 1px solid #1e293b;
         }
-        
-        /* ESTILOS DEL NUEVO LOGO */
-        .brand-logo {
-            width: 45px; 
-            height: 45px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            background-color: #ffffff; /* Fondo blanco para que el logo resalte */
-            border-radius: 8px;
-            padding: 4px;
+        .brand-logo-app {
+            width: 100%; height: 80px; display: flex; align-items: center; justify-content: center;
+            background-color: #ffffff; border-radius: 6px; padding: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
-        .brand-logo img {
-            max-width: 100%; 
-            max-height: 100%; 
-            object-fit: contain;
-        }
+        .brand-logo-app img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-        .brand-text h1 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; line-height: 1.2;}
+        .brand-text h1 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; line-height: 1.3; color: #f8fafc;}
         .brand-text span { font-size: 11px; color: #94a3b8; }
 
         .nav-menu { padding: 20px 0; flex: 1; }
@@ -68,7 +99,9 @@
         .nav-item:hover, .nav-item.active { background-color: var(--primary-light); color: white; border-left: 4px solid var(--accent); }
         .nav-item i { width: 20px; text-align: center; font-size: 16px; }
 
-        .sidebar-footer { padding: 20px; border-top: 1px solid #1e293b; font-size: 12px; color: #64748b; text-align: center; }
+        .sidebar-footer { padding: 20px; border-top: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center;}
+        .logout-btn { background: none; border: none; color: #94a3b8; cursor: pointer; transition: 0.2s; font-size: 16px;}
+        .logout-btn:hover { color: var(--danger); }
 
         /* --- MAIN CONTENT --- */
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -86,7 +119,7 @@
             background: var(--bg-body); font-weight: 600; color: var(--primary); outline: none; cursor: pointer;
         }
         
-        .topbar-actions { display: flex; gap: 10px; }
+        .topbar-actions { display: flex; align-items: center; gap: 15px; }
 
         .btn {
             padding: 9px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600;
@@ -99,28 +132,22 @@
         .btn-add { background-color: var(--accent); color: white; margin-top: 15px; }
         .btn-add:hover { background-color: var(--accent-hover); }
 
+        .btn-secret { background: transparent; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer; opacity: 0.05; transition: 0.3s; padding: 5px; }
+        .btn-secret:hover { opacity: 0.4; color: var(--primary); }
+
         /* --- CONTENT AREA --- */
         .content-area { padding: 30px; overflow-y: auto; flex: 1; }
         .section { display: none; animation: fadeIn 0.3s ease-in-out; }
         .section.active { display: block; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .section-header { margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end; }
         .section-header h2 { font-size: 24px; color: var(--primary); }
         .section-header p { color: var(--text-muted); font-size: 14px; margin-top: 5px; }
 
         /* --- DASHBOARD LAYOUT --- */
-        .dash-layout {
-            display: grid;
-            grid-template-columns: 260px 1fr 260px;
-            gap: 25px;
-            align-items: start;
-        }
-
+        .dash-layout { display: grid; grid-template-columns: 260px 1fr 260px; gap: 25px; align-items: start; }
         .dash-side-col { display: flex; flex-direction: column; gap: 15px; }
         
-        /* Tarjetas Años Anteriores */
         .year-card {
             background: var(--bg-card); padding: 16px; border-radius: 8px; border: 1px solid var(--border);
             box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: transform 0.2s; margin-bottom: 5px;
@@ -152,8 +179,7 @@
 
         .month-item {
             background: var(--bg-card); padding: 12px 15px; border-radius: 8px; border: 1px solid var(--border);
-            display: flex; flex-direction: column; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-            flex-shrink: 0;
+            display: flex; flex-direction: column; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02); flex-shrink: 0;
         }
         .month-item:hover { border-color: var(--accent); transform: translateX(-3px); }
         .month-item.active { background: var(--primary); color: white; border-color: var(--primary); }
@@ -176,10 +202,7 @@
 
         /* Graficos Centrales */
         .charts-container { display: grid; grid-template-columns: 1fr; gap: 20px; }
-        .chart-box { 
-            background: var(--bg-card); padding: 20px; border-radius: 10px; border: 1px solid var(--border); 
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column;
-        }
+        .chart-box { background: var(--bg-card); padding: 20px; border-radius: 10px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
         .chart-wrapper { position: relative; width: 100%; height: 260px; flex: 1; } 
 
         /* --- TABLES --- */
@@ -199,11 +222,8 @@
 
         td[contenteditable="true"] { transition: 0.2s; }
         td[contenteditable="true"]:focus { background: #fffbeb; outline: 2px solid var(--warning); border-radius: 4px; }
-        
         input[type="date"], select { border: 1px solid #cbd5e1; border-radius: 4px; padding: 5px; font-family: inherit; font-size: 13px; color: var(--primary); width: 100%; outline: none; }
-        
         .monto-cell { font-weight: 600; text-align: right; }
-
         .btn-action { color: var(--text-muted); background: none; border: none; cursor: pointer; font-size: 16px; padding: 5px; border-radius: 4px; transition: 0.2s; }
         .btn-action:hover { color: var(--danger); background: #fee2e2; }
 
@@ -223,197 +243,219 @@
             transform: translateX(150%); transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
         .toast.show { transform: translateX(0); }
-
     </style>
 </head>
 <body>
 
-<aside class="sidebar">
-    <div class="brand">
-        <div class="brand-logo">
+<div id="login-screen">
+    <div class="login-card">
+        <div class="login-logo">
             <img src="logo.png" alt="Logo ElectroMantenciones">
         </div>
-        <div class="brand-text">
-            <h1>ElectroMantenciones</h1>
-            <span>Andinas SpA - ERP</span>
-        </div>
-    </div>
-    <div class="nav-menu">
-        <div class="nav-item active" onclick="navigate('dashboard', this)">
-            <i class="fa-solid fa-chart-pie"></i> Panel de Control
-        </div>
-        <div class="nav-item" onclick="navigate('ventas', this)">
-            <i class="fa-solid fa-file-invoice-dollar"></i> Registro Ventas
-        </div>
-        <div class="nav-item" onclick="navigate('compras', this)">
-            <i class="fa-solid fa-shopping-cart"></i> Registro Compras
-        </div>
-    </div>
-    <div class="sidebar-footer">
-        Versión 2.4 Enterprise<br>Layout Estadísticas Optimizado
-    </div>
-</aside>
-
-<main class="main-content">
-    
-    <header class="topbar">
-        <div class="period-controls">
-            <label><i class="fa-regular fa-calendar-alt"></i> Mes de Edición:</label>
-            <select id="select-mes" onchange="cargarDatosMes()">
-                <option value="0">Enero</option><option value="1">Febrero</option>
-                <option value="2">Marzo</option><option value="3">Abril</option>
-                <option value="4">Mayo</option><option value="5">Junio</option>
-                <option value="6">Julio</option><option value="7">Agosto</option>
-                <option value="8">Septiembre</option><option value="9">Octubre</option>
-                <option value="10">Noviembre</option><option value="11">Diciembre</option>
-            </select>
-            <select id="select-anio" onchange="cargarDatosMes()">
-                <option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option>
-            </select>
-        </div>
-        <div class="topbar-actions">
-            <button class="btn btn-save" onclick="guardarDatosBoton()"><i class="fa-solid fa-floppy-disk"></i> Guardar Cambios</button>
-        </div>
-    </header>
-
-    <div class="content-area">
+        <h2>ElectroMantenciones</h2>
+        <p>Acceso Seguro al Sistema ERP</p>
         
-        <section id="sec-dashboard" class="section active">
-            <div class="section-header">
-                <div>
-                    <h2>Estadísticas Anuales <span id="dash-year-title" style="color:var(--accent);">2026</span></h2>
-                    <p id="dash-subtitle">Visión general anual y comparativa de caja.</p>
-                </div>
-                <button class="btn btn-export" onclick="window.print()"><i class="fa-solid fa-print"></i> Imprimir Reporte</button>
-            </div>
-
-            <div class="dash-layout">
-                <div class="dash-side-col" id="col-past-years">
-                    <h3 style="font-size: 13px; color: var(--text-muted); text-transform: uppercase;">Resumen Otros Años</h3>
-                    </div>
-
-                <div class="dash-center-col">
-                    <div class="kpi-grid">
-                        <div class="kpi-card green">
-                            <i class="fa-solid fa-arrow-trend-up kpi-icon"></i>
-                            <div class="kpi-title">Ventas (Total Anual)</div>
-                            <div class="kpi-value" id="kpi-ventas-total">$0</div>
-                            <div class="kpi-details">
-                                <span>Neto: <b id="kpi-ventas-neto">$0</b></span>
-                                <span>IVA (19%): <b id="kpi-ventas-iva">$0</b></span>
-                            </div>
-                        </div>
-                        <div class="kpi-card red">
-                            <i class="fa-solid fa-arrow-trend-down kpi-icon"></i>
-                            <div class="kpi-title">Compras (Total Anual)</div>
-                            <div class="kpi-value" id="kpi-compras-total">$0</div>
-                            <div class="kpi-details">
-                                <span>Neto: <b id="kpi-compras-neto">$0</b></span>
-                                <span>IVA (19%): <b id="kpi-compras-iva">$0</b></span>
-                            </div>
-                        </div>
-                        <div class="kpi-card" style="border-top-color: var(--primary);">
-                            <i class="fa-solid fa-scale-balanced kpi-icon"></i>
-                            <div class="kpi-title">Utilidad Bruta Anual</div>
-                            <div class="kpi-value" id="kpi-utilidad">$0</div>
-                            <div class="kpi-details" style="justify-content: center;">
-                                <span id="kpi-margen" style="font-weight: bold; color: var(--primary);">Margen: 0%</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="charts-container">
-                        <div class="chart-box">
-                            <h3 style="font-size: 14px; color: var(--text-muted); margin-bottom: 15px;">Comparativa Ingresos vs Egresos del Año</h3>
-                            <div class="chart-wrapper">
-                                <canvas id="mainChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="dash-side-col" id="col-months">
-                    <h3 style="font-size: 13px; color: var(--text-muted); text-transform: uppercase;">Desglose Mensual</h3>
-                    <div id="months-list-container">
-                        </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="sec-ventas" class="section">
-            <div class="section-header">
-                <div>
-                    <h2>Registro de Ventas</h2>
-                    <p>Gestión de facturas emitidas a clientes en el mes seleccionado.</p>
-                </div>
-            </div>
-            <div class="table-container">
-                <div class="table-toolbar">
-                    <div class="search-wrapper">
-                        <i class="fa-solid fa-search"></i>
-                        <input type="text" id="searchVentas" placeholder="Buscar cliente, factura..." onkeyup="filtrar('ventasTable', 'searchVentas')">
-                    </div>
-                    <button class="btn btn-export" onclick="exportar('ventasTable', 'Ventas')"><i class="fa-solid fa-file-csv"></i> Exportar CSV</button>
-                </div>
-                <div class="table-responsive">
-                    <table id="ventasTable">
-                        <thead>
-                            <tr>
-                                <th width="12%">Factura</th>
-                                <th width="22%">Cliente</th>
-                                <th width="14%">Emisión</th>
-                                <th width="14%">Vencimiento</th>
-                                <th width="18%" style="text-align: right;">Total Bruto ($)</th>
-                                <th width="12%">Tipo</th>
-                                <th width="8%" style="text-align:center;">Borrar</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-            <button class="btn btn-add" onclick="agregarFila('ventasTable')"><i class="fa-solid fa-plus"></i> Añadir Nueva Venta</button>
-        </section>
-
-        <section id="sec-compras" class="section">
-            <div class="section-header">
-                <div>
-                    <h2>Registro de Compras</h2>
-                    <p>Gestión de facturas recibidas y gastos en el mes seleccionado.</p>
-                </div>
-            </div>
-            <div class="table-container">
-                <div class="table-toolbar">
-                    <div class="search-wrapper">
-                        <i class="fa-solid fa-search"></i>
-                        <input type="text" id="searchCompras" placeholder="Buscar proveedor, factura..." onkeyup="filtrar('comprasTable', 'searchCompras')">
-                    </div>
-                    <button class="btn btn-export" onclick="exportar('comprasTable', 'Compras')"><i class="fa-solid fa-file-csv"></i> Exportar CSV</button>
-                </div>
-                <div class="table-responsive">
-                    <table id="comprasTable">
-                        <thead>
-                            <tr>
-                                <th width="12%">Factura</th>
-                                <th width="22%">Proveedor</th>
-                                <th width="14%">Emisión</th>
-                                <th width="14%">Recibo</th>
-                                <th width="18%" style="text-align: right;">Total Bruto ($)</th>
-                                <th width="12%">Centro Costo</th>
-                                <th width="8%" style="text-align:center;">Borrar</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-            <button class="btn btn-add" onclick="agregarFila('comprasTable')"><i class="fa-solid fa-plus"></i> Añadir Nueva Compra</button>
-        </section>
-
+        <div class="input-group">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" id="input-password" placeholder="Ingrese su contraseña" onkeydown="if(event.key === 'Enter') loginApp()">
+        </div>
+        
+        <div id="login-error"><i class="fa-solid fa-circle-exclamation"></i> Contraseña incorrecta</div>
+        
+        <button class="btn-login" onclick="loginApp()">Ingresar al Sistema</button>
     </div>
-</main>
+</div>
 
-<div id="toast" class="toast">
+<div id="app-container">
+
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-logo-app">
+                <img src="logo.png" alt="Logo ElectroMantenciones">
+            </div>
+            <div class="brand-text">
+                <h1>ElectroMantenciones</h1>
+                <span>Andinas SpA - ERP</span>
+            </div>
+        </div>
+        <div class="nav-menu">
+            <div class="nav-item active" onclick="navigate('dashboard', this)">
+                <i class="fa-solid fa-chart-pie"></i> Panel de Control
+            </div>
+            <div class="nav-item" onclick="navigate('ventas', this)">
+                <i class="fa-solid fa-file-invoice-dollar"></i> Registro Ventas
+            </div>
+            <div class="nav-item" onclick="navigate('compras', this)">
+                <i class="fa-solid fa-shopping-cart"></i> Registro Compras
+            </div>
+        </div>
+        <div class="sidebar-footer">
+            <div style="font-size: 11px; text-align: left;">Versión 2.6<br>Acceso Seguro</div>
+            <button class="logout-btn" onclick="logoutApp()" title="Cerrar Sesión"><i class="fa-solid fa-right-from-bracket"></i></button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        
+        <header class="topbar">
+            <div class="period-controls">
+                <label><i class="fa-regular fa-calendar-alt"></i> Mes de Edición:</label>
+                <select id="select-mes" onchange="cargarDatosMes()">
+                    <option value="0">Enero</option><option value="1">Febrero</option>
+                    <option value="2">Marzo</option><option value="3">Abril</option>
+                    <option value="4">Mayo</option><option value="5">Junio</option>
+                    <option value="6">Julio</option><option value="7">Agosto</option>
+                    <option value="8">Septiembre</option><option value="9">Octubre</option>
+                    <option value="10">Noviembre</option><option value="11">Diciembre</option>
+                </select>
+                <select id="select-anio" onchange="cargarDatosMes()">
+                    <option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option>
+                </select>
+            </div>
+            <div class="topbar-actions">
+                <button class="btn-secret" onclick="generarDatosMasivos()" title="Generador de Prueba"><i class="fa-solid fa-bug"></i></button>
+                <button class="btn btn-save" onclick="guardarDatosBoton()"><i class="fa-solid fa-floppy-disk"></i> Guardar Cambios</button>
+            </div>
+        </header>
+
+        <div class="content-area">
+            
+            <section id="sec-dashboard" class="section active">
+                <div class="section-header">
+                    <div>
+                        <h2>Estadísticas Anuales <span id="dash-year-title" style="color:var(--accent);">2026</span></h2>
+                        <p id="dash-subtitle">Visión general anual y comparativa de caja.</p>
+                    </div>
+                    <button class="btn btn-export" onclick="window.print()"><i class="fa-solid fa-print"></i> Imprimir Reporte</button>
+                </div>
+
+                <div class="dash-layout">
+                    <div class="dash-side-col" id="col-past-years">
+                        <h3 style="font-size: 13px; color: var(--text-muted); text-transform: uppercase;">Resumen Otros Años</h3>
+                        </div>
+
+                    <div class="dash-center-col">
+                        <div class="kpi-grid">
+                            <div class="kpi-card green">
+                                <i class="fa-solid fa-arrow-trend-up kpi-icon"></i>
+                                <div class="kpi-title">Ventas (Total Anual)</div>
+                                <div class="kpi-value" id="kpi-ventas-total">$0</div>
+                                <div class="kpi-details">
+                                    <span>Neto: <b id="kpi-ventas-neto">$0</b></span>
+                                    <span>IVA (19%): <b id="kpi-ventas-iva">$0</b></span>
+                                </div>
+                            </div>
+                            <div class="kpi-card red">
+                                <i class="fa-solid fa-arrow-trend-down kpi-icon"></i>
+                                <div class="kpi-title">Compras (Total Anual)</div>
+                                <div class="kpi-value" id="kpi-compras-total">$0</div>
+                                <div class="kpi-details">
+                                    <span>Neto: <b id="kpi-compras-neto">$0</b></span>
+                                    <span>IVA (19%): <b id="kpi-compras-iva">$0</b></span>
+                                </div>
+                            </div>
+                            <div class="kpi-card" style="border-top-color: var(--primary);">
+                                <i class="fa-solid fa-scale-balanced kpi-icon"></i>
+                                <div class="kpi-title">Utilidad Bruta Anual</div>
+                                <div class="kpi-value" id="kpi-utilidad">$0</div>
+                                <div class="kpi-details" style="justify-content: center;">
+                                    <span id="kpi-margen" style="font-weight: bold; color: var(--primary);">Margen: 0%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="charts-container">
+                            <div class="chart-box">
+                                <h3 style="font-size: 14px; color: var(--text-muted); margin-bottom: 15px;">Comparativa Ingresos vs Egresos del Año</h3>
+                                <div class="chart-wrapper">
+                                    <canvas id="mainChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dash-side-col" id="col-months">
+                        <h3 style="font-size: 13px; color: var(--text-muted); text-transform: uppercase;">Desglose Mensual</h3>
+                        <div id="months-list-container">
+                            </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-ventas" class="section">
+                <div class="section-header">
+                    <div>
+                        <h2>Registro de Ventas</h2>
+                        <p>Gestión de facturas emitidas a clientes en el mes seleccionado.</p>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <div class="table-toolbar">
+                        <div class="search-wrapper">
+                            <i class="fa-solid fa-search"></i>
+                            <input type="text" id="searchVentas" placeholder="Buscar cliente, factura..." onkeyup="filtrar('ventasTable', 'searchVentas')">
+                        </div>
+                        <button class="btn btn-export" onclick="exportar('ventasTable', 'Ventas')"><i class="fa-solid fa-file-csv"></i> Exportar CSV</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="ventasTable">
+                            <thead>
+                                <tr>
+                                    <th width="12%">Factura</th>
+                                    <th width="22%">Cliente</th>
+                                    <th width="14%">Emisión</th>
+                                    <th width="14%">Vencimiento</th>
+                                    <th width="18%" style="text-align: right;">Total Bruto ($)</th>
+                                    <th width="12%">Tipo</th>
+                                    <th width="8%" style="text-align:center;">Borrar</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <button class="btn btn-add" onclick="agregarFila('ventasTable')"><i class="fa-solid fa-plus"></i> Añadir Nueva Venta</button>
+            </section>
+
+            <section id="sec-compras" class="section">
+                <div class="section-header">
+                    <div>
+                        <h2>Registro de Compras</h2>
+                        <p>Gestión de facturas recibidas y gastos en el mes seleccionado.</p>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <div class="table-toolbar">
+                        <div class="search-wrapper">
+                            <i class="fa-solid fa-search"></i>
+                            <input type="text" id="searchCompras" placeholder="Buscar proveedor, factura..." onkeyup="filtrar('comprasTable', 'searchCompras')">
+                        </div>
+                        <button class="btn btn-export" onclick="exportar('comprasTable', 'Compras')"><i class="fa-solid fa-file-csv"></i> Exportar CSV</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="comprasTable">
+                            <thead>
+                                <tr>
+                                    <th width="12%">Factura</th>
+                                    <th width="22%">Proveedor</th>
+                                    <th width="14%">Emisión</th>
+                                    <th width="14%">Recibo</th>
+                                    <th width="18%" style="text-align: right;">Total Bruto ($)</th>
+                                    <th width="12%">Centro Costo</th>
+                                    <th width="8%" style="text-align:center;">Borrar</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <button class="btn btn-add" onclick="agregarFila('comprasTable')"><i class="fa-solid fa-plus"></i> Añadir Nueva Compra</button>
+            </section>
+
+        </div>
+    </main>
+
+</div> <div id="toast" class="toast">
     <i class="fa-solid fa-circle-check" style="font-size: 20px;"></i>
     <span id="toast-msg">Acción realizada</span>
 </div>
@@ -424,13 +466,49 @@
     
     let barChartInstance = null;
 
+    // --- SISTEMA DE LOGIN ---
     window.onload = () => {
+        // Verificar si ya inició sesión en esta ventana
+        if(sessionStorage.getItem('erp_auth') === 'true') {
+            iniciarSistema();
+        } else {
+            // Enfocar input automáticamente
+            document.getElementById('input-password').focus();
+        }
+    };
+
+    function loginApp() {
+        const pass = document.getElementById('input-password').value;
+        const err = document.getElementById('login-error');
+        
+        if(pass === 'electro2026') {
+            sessionStorage.setItem('erp_auth', 'true');
+            iniciarSistema();
+        } else {
+            err.style.display = 'block';
+            document.getElementById('input-password').value = '';
+            document.getElementById('input-password').focus();
+        }
+    }
+
+    function logoutApp() {
+        sessionStorage.removeItem('erp_auth');
+        location.reload(); // Recargar página te devuelve al login
+    }
+
+    function iniciarSistema() {
+        // Ocultar login y mostrar app
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app-container').style.display = 'flex';
+        
+        // Iniciar fechas y datos
         const hoy = new Date();
         document.getElementById('select-mes').value = hoy.getMonth();
         document.getElementById('select-anio').value = hoy.getFullYear();
         cargarDatosMes();
-    };
+    }
 
+    // --- NAVEGACIÓN Y TABLAS ---
     function navigate(sectionId, element) {
         document.querySelectorAll('.section, .nav-item').forEach(el => el.classList.remove('active'));
         document.getElementById(`sec-${sectionId}`).classList.add('active');
@@ -516,10 +594,7 @@
         actualizarDashboardGlobal();
     }
 
-    // ==========================================
-    // LÓGICA DEL DASHBOARD
-    // ==========================================
-
+    // --- LÓGICA DEL DASHBOARD ---
     function obtenerTotalesMes(anio, mesIdx) {
         const esMesActual = (anio == document.getElementById('select-anio').value && mesIdx == document.getElementById('select-mes').value);
         let v = 0, c = 0;
@@ -605,7 +680,6 @@
                     vA += dt.ventas; cA += dt.compras;
                 }
                 const utA = vA - cA;
-                
                 const gananciaClass = utA >= 0 ? 'pos' : 'neg';
                 const gananciaTexto = utA >= 0 ? 'Ganancia' : 'Pérdida';
 
@@ -668,6 +742,35 @@
         document.getElementById('toast-msg').innerText = msg;
         t.classList.add('show');
         setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function generarDatosMasivos() {
+        if(!confirm("Esto llenará de datos reales de prueba 2024, 2025 y hasta Marzo de 2026. ¿Proceder?")) return;
+        const years = [2024, 2025, 2026];
+        const provs = ["Sodimac HBE", "TecnoRed SA", "Ferretería O'Higgins"];
+        const clis = ["Minera Los Pelambres", "Codelco", "Constructora Echeverría"];
+
+        years.forEach(anio => {
+            let maxMes = (anio === 2026) ? 2 : 11; 
+            for (let mes = 0; mes <= maxMes; mes++) {
+                let compras = [], ventas = [];
+                for(let i=0; i<4; i++) {
+                    compras.push({
+                        f: `FC-${Math.floor(Math.random()*80000)+10000}`, entidad: provs[Math.floor(Math.random()*provs.length)],
+                        d1: `${anio}-${String(mes+1).padStart(2,'0')}-05`, d2: `${anio}-${String(mes+1).padStart(2,'0')}-20`,
+                        m: Math.floor(Math.random()*600000)+100000, t: "Material"
+                    });
+                    ventas.push({
+                        f: `FV-${Math.floor(Math.random()*80000)+10000}`, entidad: clis[Math.floor(Math.random()*clis.length)],
+                        d1: `${anio}-${String(mes+1).padStart(2,'0')}-10`, d2: `${anio}-${String(mes+1).padStart(2,'0')}-25`,
+                        m: Math.floor(Math.random()*1200000)+200000, t: "Servicio"
+                    });
+                }
+                localStorage.setItem(`ERP_V2_${anio}_${mes}`, JSON.stringify({ compras, ventas }));
+            }
+        });
+        mostrarToast("Base de datos de prueba (Escala ~40M) generada.");
+        cargarDatosMes(); 
     }
 
     function exportar(tId, name) {
